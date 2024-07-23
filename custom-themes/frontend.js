@@ -30,17 +30,16 @@
         theme11: 'Ocean Blue'
     };
 
-    // Check if the `themes` object is available before extending it
-    const interval = setInterval(function() {
+    const themeObserver = new MutationObserver(function() {
         if (typeof themes !== 'undefined') {
-            clearInterval(interval);
-
+            themeObserver.disconnect(); // Stop observing once `themes` is available
+    
             // Extend the existing themes with new ones
             Object.assign(themes, additionalThemes);
-
+    
             // Get the dropdown menu for themes
             const $themeSelectorOptions = $('#theme-selector .options').length ? $('#theme-selector .options') : $('#server-theme-selector .options');
-
+    
             // Append new theme options to the dropdown
             for (const [key, name] of Object.entries(themeNames)) {
                 if (themes[key]) {
@@ -48,7 +47,7 @@
                     $themeSelectorOptions.append(listItem);
                 }
             }
-
+    
             // Apply the saved theme if it exists
             const savedTheme = localStorage.getItem('theme');
             if (savedTheme && themes[savedTheme]) {
@@ -58,7 +57,9 @@
                 $('#theme-selector input').val($(`#theme-selector .option[data-value="${savedTheme}"]`).text());
             }
         }
-    }, 100); // Poll every 100ms until `themes` object is available
+    });
+    
+    themeObserver.observe(document, { childList: true, subtree: true });    
 
     // Event handler for theme selection
     $(document).on('click', '#theme-selector .option', function() {
